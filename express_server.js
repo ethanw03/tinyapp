@@ -16,6 +16,8 @@ function generateRandomString() {
   return Math.random().toString(36).substring(2, 8);
 }
 
+const users = {};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -79,6 +81,17 @@ app.get('/register', (req, res) => {
   let templateVars = {username: req.cookies['username']};
   res.render('urls_registration', templateVars);
 })
+
+app.post("/register", (req, res) => {
+  const userID = generateRandomString();
+  users[userID] = {
+    userID,
+    email: req.body.email,
+    password: req.body.password
+  }
+  res.cookie('user_id', userID);
+  res.redirect('/urls')
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
