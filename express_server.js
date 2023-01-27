@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; //default port 8080
-
+const { findEmail } = require('./helpers')
 app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 
@@ -21,13 +21,6 @@ function generateRandomString() {
   return Math.random().toString(36).substring(2, 8);
 }
 
-const findEmail = (email, database) => {
-  for (const user in database) {
-    if (database[user].email === email){
-      return database[user];
-    }
-  } return undefined;
-}
 
 const urlsUser = (id) => {
   let userURLs = {};
