@@ -23,6 +23,14 @@ const findEmail = (email, database) => {
   } return undefined;
 }
 
+const urlsUser = (id) => {
+  let userURLs = {};
+  for (const shortURL in urlDatabase){
+    if(urlDatabase.userID === id){
+      userURLs[shortURL] = urlDatabase[shortURL];
+    }
+  } return userURLs;
+}
 
 
 app.get("/", (req, res) => {
@@ -38,8 +46,10 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]]};
-  res.render("urls_index", templateVars);
+ const userID = req.cookies['user_id'];
+ const userURLs = urlsUser(userID);
+ let templateVars = { urls: userURLs, user: users[userID]};
+ res.render('urls_index', templateVars);
 });
 
 app.post("/urls", (req, res) => {
@@ -60,10 +70,12 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  const userID = req.cookies['user_id'];
+  const userURLs = urlsUser(userID);
   let templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL].longURL,
-    user: users[req.cookies['user_id']],
+    urls: userURLs,
+    user: users[userID],
+    shortURL: req.params.shortURL
   };
   res.render("urls_show", templateVars);
 });
