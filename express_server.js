@@ -18,12 +18,12 @@ function generateRandomString() {
   return Math.random().toString(36).substring(2, 8);
 }
 
-const findEmail = (email) => {
-  for (const user in users) {
-    if (users[user].email === email){
-      return true
+const findEmail = (email, database) => {
+  for (const user in database) {
+    if (database[user].email === email){
+      return database[user];
     }
-  } return false;
+  } return undefined;
 }
 
 
@@ -99,7 +99,7 @@ app.get('/register', (req, res) => {
 
 app.post('/register', (req, res) => {
   if (req.body.email && req.body.password) {
-    if (!findEmailInDatabase(req.body.email)) {
+    if (!findEmail(req.body.email, users)) {
       const userID = generateRandomString();
       users[userID] = {
         userID,
