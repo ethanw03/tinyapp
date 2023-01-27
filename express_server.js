@@ -11,7 +11,7 @@ app.use(cookieSession({
   keys: ['7f69fa85-caec-4d9c-acd7-eebdccb368d5', 'f13b4d38-41c4-46d3-9ef6-8836d03cd8eb']
 }))
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const urlDatabase = {};
 
