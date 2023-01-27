@@ -4,8 +4,11 @@ const PORT = 8080; //default port 8080
 
 app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
+
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
+
+const bcrypt = require('bcrypt');
 
 const urlDatabase = {};
 
@@ -38,7 +41,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls.json", (req, res) => {
-  res.send(urlDatabase);
+  res.send(users);
 });
 
 app.get("/hello", (req, res) => {
@@ -98,7 +101,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
   if(longURL){
-    res.redirect(urlDatabase[req.params.shortURL].longURL)
+    res.redirect(longURL)
   } else { res.statusCode = 404;
   res.send('<h2>404 Not Found<br>This url does not exist.</h2>')
   }
@@ -143,7 +146,7 @@ app.post('/register', (req, res) => {
       users[userID] = {
         userID,
         email: req.body.email,
-        password: req.body.password
+        password: bcrypt.hashSync(req.body,password, 10)
       }
       res.cookie('user_id', userID);
       res.redirect('/urls');
