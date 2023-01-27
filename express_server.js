@@ -8,15 +8,25 @@ const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
+  "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
 };
+
+const users = {};
 
 function generateRandomString() {
   return Math.random().toString(36).substring(2, 8);
 }
 
-const users = {};
+const findEmail = (email) => {
+  for (const user in users) {
+    if (users[user].email === email){
+      return true
+    }
+  } return false;
+}
+
+
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -31,7 +41,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  let templateVars = { urls: urlDatabase, user: users[req.cookies["username"]]};
   res.render("urls_index", templateVars);
 });
 
@@ -42,7 +52,7 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = { username: req.cookies["username"] };
+  let templateVars = { user: users[req.cookies["username"]] };
   res.render("urls_new");
 });
 
@@ -50,7 +60,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies["username"],
+    user: users[req.cookies['user_id']],
   };
   res.render("urls_show", templateVars);
 });
@@ -72,25 +82,40 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(urlDatabase[req.params.shortURL]);
 });
 
+app.get('/login', (req, res) => {
+  let templateVars = {user: users[req.cookies['user_id']]};
+  res.render('urls_login', templateVars);
+});
+
 app.post("/login", (req, res) => {
   res.cookie("username", req.body.username);
   res.redirect("/urls");
 });
 
 app.get('/register', (req, res) => {
-  let templateVars = {username: req.cookies['username']};
+  let templateVars = {user: users[req.cookies['user_id']]};
   res.render('urls_registration', templateVars);
 })
 
-app.post("/register", (req, res) => {
-  const userID = generateRandomString();
-  users[userID] = {
-    userID,
-    email: req.body.email,
-    password: req.body.password
+app.post('/register', (req, res) => {
+  if (req.body.email && req.body.password) {
+    if (!findEmailInDatabase(req.body.email)) {
+      const userID = generateRandomString();
+      users[userID] = {
+        userID,
+        email: req.body.email,
+        password: req.body.password
+      }
+      res.cookie('user_id', userID);
+      res.redirect('/urls');
+    } else {
+      res.statusCode = 400;
+      res.send('<h2>400  Bad Request<br>Email already registered.</h2>')
+    }
+  } else {
+    res.statusCode = 400;
+    res.send('<h2>400  Bad Request<br>Please fill out the email and password fields.</h2>')
   }
-  res.cookie('user_id', userID);
-  res.redirect('/urls')
 });
 
 app.listen(PORT, () => {
