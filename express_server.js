@@ -41,7 +41,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]]};
+  let templateVars = { urls: urlDatabase, user: users[req.cookies["username"]]};
   res.render("urls_index", templateVars);
 });
 
@@ -52,7 +52,7 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = { user: users[req.cookies["user_id"]] };
+  let templateVars = { user: users[req.cookies["username"]] };
   res.render("urls_new");
 });
 
@@ -78,18 +78,15 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
+
   res.redirect(urlDatabase[req.params.shortURL]);
 });
 
-<<<<<<< HEAD
-//login route
-=======
 app.get('/login', (req, res) => {
   let templateVars = {user: users[req.cookies['user_id']]};
   res.render('urls_login', templateVars);
 });
 
->>>>>>> feature/user-registration
 app.post("/login", (req, res) => {
   const user = findEmail(req.body.email, users);
   if (user) {
@@ -108,7 +105,7 @@ app.post("/login", (req, res) => {
 
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
-  res.redirect('/urls_login');
+  res.redirect('/');
 })
 
 app.get('/register', (req, res) => {
@@ -136,13 +133,6 @@ app.post('/register', (req, res) => {
     res.send('<h2>400  Bad Request<br>Please fill out the email and password fields.</h2>')
   }
 });
-
-//logout route
-app.post('/logout', (req, res) => {
-  res.clearCookie('username');
-  res.redirect('/urls');
-})
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
