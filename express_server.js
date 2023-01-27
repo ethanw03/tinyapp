@@ -52,8 +52,12 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = { user: users[req.cookies["username"]] };
-  res.render("urls_new");
+  if (req.cookies['user_id']) {
+    let templateVars = {user: users[req.cookies['user_id']]};
+    res.render('urls_new', templateVars);
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -78,8 +82,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
-
-  res.redirect(urlDatabase[req.params.shortURL]);
+  if(longURL){
+    res.redirect(urlDatabase[req.params.shortURL])
+  } else { res.statusCode = 404;
+  res.send('<h2>404 Not Found<br>This url does not exist.</h2>')
+  }
+ 
 });
 
 app.get('/login', (req, res) => {
@@ -105,7 +113,7 @@ app.post("/login", (req, res) => {
 
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
-  res.redirect('/');
+  res.redirect('/urls/login');
 })
 
 app.get('/register', (req, res) => {
