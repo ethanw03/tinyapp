@@ -27,7 +27,7 @@ function generateRandomString() {
 const urlsUser = (id, database) => {
   let userURLs = {};
   for (const shortURL in database){
-    if(database[shortURL].userID === id){
+    if(database[shortURL].user_id === id){
       userURLs[shortURL] = database[shortURL];
     }
   } return userURLs;
@@ -46,7 +46,6 @@ app.get("/urls", (req, res) => {
  const userID = req.session.user_id;
  const userURLs = urlsUser(userID, urlDatabase);
  let templateVars = { urls: userURLs, user: users[userID]};
- res.render('urls_index', templateVars);
  if (!userID) {
   res.statusCode = 401;
  }
@@ -62,7 +61,8 @@ app.post("/urls", (req, res) => {
   };
   res.redirect(`/urls/${shortURL}`);
 } else {
-  res.redirect('/login')
+  res.statusCode = 401
+  res.send('<h2>You must be signed in.</h2>')
 }
 });
 
@@ -79,7 +79,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const userID = req.session.user_id;
   const userURLs = urlsUser(userID, urlDatabase);
-  let templateVars = { urlDatabase, userURLs, shortURL, user: users[userID]
+  const templateVars = { urlDatabase, userURLs, shortURL, user: users[userID]
   };
   if(!urlDatabase[shortURL]) {
     res.statusCode = 404;
@@ -87,14 +87,13 @@ app.get("/urls/:shortURL", (req, res) => {
   } else if (!userID || !userURLs[shortURL]){
     res.statusCode = 401;
     res.send('<h2>401 <3 Bad Request<br>You do not have permission to access these URLS.</h2>')
-  } else {
-  res.render("urls_show", templateVars);
   }
+  res.render("urls_show", templateVars);
 });
 
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  if(req.session.user_id && req.session.user_id === urlDatabase[shortURL].userID) {
+  if(req.session.user_id === urlDatabase[shortURL].user_id) {
     urlDatabase[shortURL].longURL = req.body.updatedURL;
     res.redirect(`/urls`);
   } else {
@@ -105,7 +104,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
-  if(req.session.user_id && req.session.user_id === urlDatabase[shortURL].userID){
+  if(req.session.user_id === urlDatabase[shortURL].user_id){
     delete urlDatabase[shortURL];
     res.redirect('/urls')
   } else {
@@ -118,8 +117,9 @@ app.get("/u/:shortURL", (req, res) => {
   if(urlDatabase[req.params.shortURL]){
     res.redirect(urlDatabase[req.params.shortURL].longURL)
   } else { 
+  let templateVars = {urlDatabase: {}, shortURL: '', user: users[req.session.user_id]}
   res.statusCode = 404;
-  res.send('<h2>404 Not Found<br>This url does not exist.</h2>')
+  res.render('urls_show', templateVars)
   }
 });
 
@@ -134,9 +134,11 @@ app.get('/login', (req, res) => {
 
 app.post("/login", (req, res) => {
   const user = findEmail(req.body.email, users);
-  if (user && bcrypt.compareSync(req.body.password, user.password)) {
-      req.session.user_id = user.user_id;
+  if (user) {
+    if (bcrypt.compareSync(req.body.password, user.password)) {
+      req.session.user_id = user.userID;
       res.redirect('/urls');
+    }
     } else {
       res.statusCode = 403
       res.send('<h2>403 Forbidden<br>You entered the wrong password or email.</h2>')

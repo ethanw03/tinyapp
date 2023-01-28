@@ -3,12 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
   <title>TinyApp</title>
 </head>
 <body>
+
   <%- include('partials/_header') %>
+  
   <main style="margin: 1em;">
     <h3>My URLs</h3>
     <% if (user) { %>
@@ -35,9 +38,10 @@
               </form>
             </td>
           </tr>
-        <% } %> 
+        <% } %>
       </tbody>
     </table>
+    <a class="btn btn-primary" href="/urls/new">Create a New Short Link</a>
     <% } else { %>
       <h5 class="text-muted mt-3">You must login or register to see your URLs.</h5>
     <% } %>
