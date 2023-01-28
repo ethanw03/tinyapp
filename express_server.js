@@ -24,11 +24,11 @@ function generateRandomString() {
 }
 
 
-const urlsUser = (id) => {
+const urlsUser = (id, database) => {
   let userURLs = {};
-  for (const shortURL in urlDatabase){
-    if(urlDatabase.userID === id){
-      userURLs[shortURL] = urlDatabase[shortURL];
+  for (const shortURL in database){
+    if(database[shortURL].userID === id){
+      userURLs[shortURL] = database[shortURL];
     }
   } return userURLs;
 }
@@ -72,7 +72,7 @@ app.get("/urls/new", (req, res) => {
     res.render('urls_new', templateVars);
   } else {
     res.redirect('/login');
-  }
+  } 
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -86,7 +86,7 @@ app.get("/urls/:shortURL", (req, res) => {
     res.send('<h2>404  Bad Request<br>This URL does not exist.</h2>')
   } else if (!userID || !userURLs[shortURL]){
     res.statusCode = 401;
-    res.send('<h2>401  Bad Request<br>You do not have permission to access these URLS.</h2>')
+    res.send('<h2>401 <3 Bad Request<br>You do not have permission to access these URLS.</h2>')
   } else {
   res.render("urls_show", templateVars);
   }
